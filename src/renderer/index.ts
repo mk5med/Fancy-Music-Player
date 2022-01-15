@@ -18,7 +18,7 @@ app.innerHTML = htmlContent.default;
 app.addEventListener("dragover", (ev) => dragover_handler(ev));
 app.addEventListener("drop", async (ev) => await drop_handler(ev));
 
-($("#prev-btn") as HTMLElement).innerHTML = `<img src="${prevSVG}" />`;
-($("#play-btn") as HTMLElement).innerHTML = `<img src="${playSVG}" />`;
-($("#next-btn") as HTMLElement).innerHTML = `<img src="${fwdSVG}" />`;
+($("#btn-prev") as HTMLElement).innerHTML = `<img src="${prevSVG}" />`;
+($("#btn-play") as HTMLElement).innerHTML = `<img src="${playSVG}" />`;
+($("#btn-next") as HTMLElement).innerHTML = `<img src="${fwdSVG}" />`;
 setup_player();

@@ -1,5 +1,6 @@
 /* Variable definition for easier editing */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+
 * {
     --colour_background: #5C5C5C;
 }
@@ -19,12 +20,6 @@ body {
     display: flex;
     height: 100vh;
     flex-direction: row;
-
-    background: repeating-linear-gradient(-45deg,
-            #575757,
-            #575757 2px,
-            var(--colour_background) 2px,
-            var(--colour_background) 15px);
 }
 
 .d-flex {
@@ -39,54 +34,59 @@ body {
     margin: 0;
 }
 
+.pointer:hover {
+    cursor: pointer;
+}
+
 .playing {
     flex: 2;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    box-sizing: border-box;
 }
 
-.playing .controls {
+.playing .music-controls {
     padding: 20px 0;
     display: flex;
-    position: absolute;
-    bottom: 0;
+    /* position: absolute; */
+    /* bottom: 0; */
     width: 100%;
     align-items: center;
     justify-content: center;
-
-    background: linear-gradient(180deg, rgba(19, 19, 19, 0.2665) 0%, rgba(19, 19, 19, 0.5) 100%);
 }
 
-.playing .controls img {
+.playing .music-controls img {
     width: 60px;
     height: 60px;
 }
 
-.playing .information {
-    padding: 2rem;
-}
-
-.playing .information h1,
-.playing .information h2 {
+.playing .music-information h1,
+.playing .music-information h2 {
     margin: 0;
     font-weight: 100;
 }
 
-.playing .information h1 {
-    margin-top: 20px;
+.playing .music-information h1 {
+    margin-top: 10px;
 }
 
+/*
+ *
+ */
+
 .playlist {
+    display: flex;
+    flex-direction: column;
     min-width: 403px;
     width: 403px;
     max-width: 403px;
-    padding: 20px;
-    padding-right: 0;
-    padding-left: 10px;
 
     background: #434343;
+}
+
+.playlist__list {
     overflow-y: scroll;
 }
 
@@ -94,13 +94,14 @@ body {
     position: relative;
     display: flex;
     padding: 20px;
-    margin-bottom: 4px;
+    margin-bottom: 1px;
 
     background: #535353;
     transition: background 0.2s;
 }
 
 .playlist .trackEntry:hover {
+    cursor: pointer;
     background: #494949;
 }
 
@@ -123,8 +124,19 @@ body {
     transform: translate(0, -50%);
 }
 
-/* The overlay that pops up when file is dragged */
+.playlist .trackEntry::before:hover {
+    cursor: crosshair;
+}
 
+.thumbnail {
+    overflow: hidden;
+}
+
+/************************************************
+ *
+ * The overlay that pops up when file is dragged
+ *
+ ************************************************/
 .overlay {
     position: absolute;
     top: 0;
@@ -138,4 +150,15 @@ body {
 
     font-size: 10vw;
     background: rgba(0, 0, 0, 0.804);
+}
+
+/**************************************************
+ * Custom rules for the material-icons library
+ **************************************************/
+.material-icons {
+    transition: 0.25s;
+}
+
+.material-icons:hover {
+    color: #ccc;
 }

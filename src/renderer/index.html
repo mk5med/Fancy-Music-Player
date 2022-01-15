@@ -1,17 +1,33 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <div class="playing">
-    <div class="information">
-        <div class="d-flex justify-center">
-            <img id="thumbnail" style="width: 246px; height: 246px; background: white; border-radius: 6px;"></img>
+    <!-- Header -->
+    <div class="d-flex" style="background-color: #5C5C5C; padding: 2rem; padding-top: 3rem">
+        <div id="thumbnail" style="width: 246px; height: 246px; background: #4F4F4F; border-radius: 12px; position: absolute; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25), 0px -2px 14px rgba(0, 0, 0, 0.1);"><img/></div>
+        <div class="music-information" style="margin-left: calc(256px + 1rem);">
+            <h1 id="playing">No music</h1>
+            <h2>No author</h2>
         </div>
-        <h1 id="playing">Drop an audio file or folder into this window to populate your playlist.</h1>
-        <!-- <h2>Author name</h2> -->
     </div>
 
-    <div class="controls">
-        <a id="prev-btn">prev-btn</a>
-        <a id="play-btn">play-btn</a>
-        <a id="next-btn">next-btn</a>
+    <div class="player-body" style="display: flex; background-color: #4F4F4F; height: 100%; justify-content: space-between; flex-direction: column;">
+        <!-- Playback track -->
+        <div style="flex: 1;"></div>
+        <div style="justify-content: center;">
+            <hr style="width: 80%;">
+        </div>
+        <div class="music-controls">
+            <a id="btn-prev">btn-prev</a>
+            <a id="btn-play">btn-play</a>
+            <a id="btn-next">btn-next</a>
+        </div>
     </div>
 </div>
 
-<div class="playlist" id="playlist"></div>
+<div class="playlist" id="playlist">
+    <div class="playlist__header" style="background-color: #3E3E3E; padding: 1rem; box-sizing: border-box;">        
+        <i class="material-icons" id="btn-save-playlist">save</i>
+        <i class="material-icons" id="btn-add-track">add_circle_outline</i>
+    </div>
+    <div class="playlist__list" id="playlist__list">
+    </div>
+</div>
