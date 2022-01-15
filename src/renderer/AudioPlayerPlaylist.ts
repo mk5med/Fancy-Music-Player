@@ -1,5 +1,6 @@
 import { $ } from './Helper'
-
+import { openOSFileImportPrompt } from './PlaylistFileHelper';
+import * as musicMetadata from 'music-metadata-browser';
 export interface Track {
   name: string,
   url: string
@@ -7,11 +8,29 @@ export interface Track {
 }
 
 export class AudioPlayerPlaylist {
-  private element_playlistContainer = $("#playlist") as HTMLElement;
+  private readonly element_playlistContainer = $("#playlist__list") as HTMLElement;
+  private readonly element_addTrackBtn = $("#btn-add-track") as HTMLElement;
+  private readonly element_savePlaylistBtn = $("#btn-save-playlist") as HTMLElement;
   private track_playlist: Track[] = []
   private elements_playlistEntries: HTMLElement[] = [];
   private playlistIndex: number = 0;
-
+  
+  constructor() {
+    this.element_addTrackBtn.addEventListener('click', () => openOSFileImportPrompt());
+    this.element_savePlaylistBtn.addEventListener('click', () => 0);
+  }
+  
+  /**
+   * Wrap an index around the playlist index space.
+   * Negative numbers reference the end of the playlist.
+   * 
+   * @param index An arbitrary integer
+   * @returns An integer within the range of the current playlist index space
+   */
+  private _wrapIndex(index: number) {
+    if (index < 0) index = this.trackCount + index;
+    return index % this.trackCount;
+  }
   /**
    * Queue a track to the playlist and update the DOM to display the new track.
    * @param track Track to add.
@@ -53,8 +72,8 @@ export class AudioPlayerPlaylist {
     })
   }
 
-  changeTrack(index: number): Track | undefined {
-    if (this.trackCount == 0) return undefined
+  changeTrack(index: number): Track | null {
+    if (this.trackCount == 0) return null
 
     // Find the first DOM element with a "selected" class name.
     let selectedElement = $(".selected")
@@ -63,16 +82,25 @@ export class AudioPlayerPlaylist {
       // The current item is de-selected
       selectedElement.classList.remove("selected");
     }
-
-    // Verify index is within the bounds of the avaliable playlist size.
-    // This also ensures that the selection loops back to start.
-    if (index < 0) index = this.trackCount + index
-
-    index %= this.trackCount;
+    
+    index = this._wrapIndex(index)
+    
     this.playlistIndex = index
     this.element_playlistContainer.children[index].classList.add("selected");
 
     return this.track_playlist[index]
+  }
+
+  /**
+   * Read the metadata of a track and return the picture information.
+   * @param index Index of the track. If left empty it defaults to the current playlist index
+   * @returns An array of picture metadata objects, otherwise undefined
+   */
+  async getTrackImage(index: number) {
+    index = this._wrapIndex(index);
+    let metadata = await musicMetadata.parseBlob(this.track_playlist[index].file);
+    if(metadata.common.picture) return metadata.common.picture
+    throw "No image found"
   }
 
   getPreviousTrack() {
@@ -98,6 +126,15 @@ export class AudioPlayerPlaylist {
    */
   resetIndex() {
     this.playlistIndex = 0;
+  }
+
+  clear() {
+    this.resetIndex();
+    this.track_playlist = [];
+  }
+
+  get currentPlaylist() {
+    return JSON.stringify(this.track_playlist)
   }
 
   get currentTrack() {

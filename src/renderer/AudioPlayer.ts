@@ -4,12 +4,13 @@ import pauseSVG from './svg/pause.svg';
 import { AudioPlayerPlaylist, Track } from './AudioPlayerPlaylist';
 
 export class AudioPlayer {
-  private element_playBtn = $("#play-btn") as HTMLElement
-  private element_nextBtn = $("#next-btn") as HTMLElement
-  private element_prevBtn = $("#prev-btn") as HTMLElement
-  private element_playBtn_img = this.element_playBtn.querySelector("img") as HTMLImageElement
-  private element_currentEntryDisplay: HTMLElement = $("#playing") as HTMLElement
-  // private element_thumbnail: HTMLElement = $("#playing") as HTMLElement
+  private element_playBtn = $("#btn-play") as HTMLElement;
+  private element_nextBtn = $("#btn-next") as HTMLElement;
+  private element_prevBtn = $("#btn-prev") as HTMLElement;
+
+  private element_playBtn_img = this.element_playBtn.querySelector("img") as HTMLImageElement;
+  private element_currentEntryDisplay: HTMLElement = $("#playing") as HTMLElement;
+  private element_thumbnail: HTMLImageElement = $("#thumbnail img") as HTMLImageElement
 
   private _audioPlayer = new Audio();
   private playlistManager = new AudioPlayerPlaylist();
@@ -51,12 +52,15 @@ export class AudioPlayer {
   // Change the current song header.
   updateTrackTitle(song: Track) {
     this.element_currentEntryDisplay.innerText = `${song.name}`;
+    this.playlistManager.getTrackImage(this.playlistManager.currentTrackIndex).then(images => {
+      this.element_thumbnail.src = `data:image/png;base64,` + images[0].data.toString("base64")
+    })
   }
 
   // Changes the track to the specified index.
   changeTrackToIndex(index: number) {
     let track = this.playlistManager.changeTrack(index)
-    if (track == undefined) return; // If there are no tracks available, do nothing
+    if (track == null) return; // If there are no tracks available, do nothing
 
     this.updateTrackTitle(track);
 
@@ -137,13 +141,30 @@ export class AudioPlayer {
       // Remove the current track
       this.removeCurrentTrack();
     } catch (e) {
-      console.error("Something went wrong when removing a track entry.")
-      console.error(e)
+      console.error("Something went wrong when removing a track entry.");
+      console.error(e);
     }
+  }
+
+  clearPlaylist() {
+    this._audioPlayer.pause();
+    this.playlistManager.clear();
   }
 
   get isPlaying() {
     return this._audioPlayer.paused === false;
+  }
+
+  /**
+   * Get the duration of the current loaded audio file.
+   * 
+   * @returns: 
+   * - The length in seconds of the current audio file if it exists.
+   * - NaN if no audio exists.
+   * - Inf if there is no predefined length.
+   */
+  get audioDuration() {
+    return this._audioPlayer.duration;
   }
 
   /**
@@ -157,16 +178,16 @@ export class AudioPlayer {
    * @param context AudioPlayer context to perform the action on.
    */
   static pauseActRestore(callback: () => void, context: AudioPlayer) {
-    let was_playing = context.isPlaying
-    if (was_playing) context.togglePlay()
+    let was_playing = context.isPlaying;
+    if (was_playing) context.togglePlay();
 
-    callback()
-    if (was_playing) context.togglePlay()
+    callback();
+    if (was_playing) context.togglePlay();
   }
 }
 
 export var player_instance: AudioPlayer;
 
 export function setup_player() {
-  player_instance = new AudioPlayer()
+  player_instance = new AudioPlayer();
 }
