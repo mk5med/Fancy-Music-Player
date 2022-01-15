@@ -24,6 +24,7 @@
     "webpack": "~4.42.1"
   },
   "dependencies": {
+    "music-metadata-browser": "^2.5.0",
     "source-map-support": "^0.5.19"
   }
 }
