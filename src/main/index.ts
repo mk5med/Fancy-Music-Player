@@ -9,8 +9,10 @@ var mainWindow:BrowserWindow | null;
 function createWindow() {
 
     let window:BrowserWindow | null = new BrowserWindow({
-        width: 1920 / 2,
-        height: 1080 / 2,
+        width: 1168,
+        height: 526,
+        minWidth: 1168,
+        minHeight: 526,
         // icon: path.join(__dirname, "../icons/png/64x64.png"),
         // frame: false,
         webPreferences: { nodeIntegration: true }
