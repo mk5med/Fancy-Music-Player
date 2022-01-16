@@ -12,9 +12,12 @@ export class AudioPlayer {
   private element_currentEntryDisplay: HTMLElement = $("#playing") as HTMLElement;
   private element_currentAuthorDisplay: HTMLElement = $("#playingAuthor") as HTMLElement;
   private element_thumbnail: HTMLImageElement = $("#thumbnail") as HTMLImageElement
+  private element_playbackTrack: HTMLInputElement = $("#seek_bar") as HTMLInputElement
 
   private _audioPlayer = new Audio();
   private playlistManager = new AudioPlayerPlaylist();
+
+  private seekbarInterval: number = -1;
 
   constructor() {
     // Prepare event listeners.
@@ -24,6 +27,7 @@ export class AudioPlayer {
     this.element_playBtn.addEventListener("click", () => this.togglePlay());
     this.element_nextBtn.addEventListener("click", () => this.gotoNextTrack());
     this.element_prevBtn.addEventListener("click", () => this.gotoPreviousTrack());
+    this.element_playbackTrack.addEventListener("input", () => this.updateTrackPlaybackPosition())
   }
 
   // Add tracks to the DOM playlist.
@@ -47,6 +51,10 @@ export class AudioPlayer {
     this.togglePlay(); // Pause audio playback
     this.changeTrackToIndex(index); // Update the DOM with the new track information
     this.togglePlay()
+  }
+
+  updateTrackPlaybackPosition() {
+    this._audioPlayer.currentTime = parseFloat(this.element_playbackTrack.value)
   }
 
   // Change the current song header.
@@ -122,8 +130,19 @@ export class AudioPlayer {
 
     if (this.isPlaying) {
       this._audioPlayer.pause();
+      if(this.seekbarInterval != -1) {
+        // When the playback is paused, remove the timed interval
+        clearInterval(this.seekbarInterval);
+      }
     } else {
       this.playCurrentTrack();
+
+      // Update the seekbar every 10ms
+      this.seekbarInterval = setInterval(() => {
+        this.element_playbackTrack.max = this._audioPlayer.duration + ""
+        this.element_playbackTrack.value = this._audioPlayer.currentTime + ""
+        this.element_playbackTrack.style.backgroundSize = `${this._audioPlayer.currentTime/this._audioPlayer.duration * 100}% 100%`
+      }, 10) as unknown as number
     }
   }
 

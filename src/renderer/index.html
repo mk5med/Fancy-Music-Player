@@ -10,10 +10,12 @@
     </div>
 
     <div class="player-body" style="display: flex; background-color: #4F4F4F; height: 100%; justify-content: space-between; flex-direction: column;">
+        <!-- Spacing -->
+        <div style="flex: 1;"></div> 
+
         <!-- Playback track -->
-        <div style="flex: 1;"></div>
-        <div style="justify-content: center;">
-            <hr style="width: 80%;">
+        <div style="display: flex; justify-content: center;">
+            <input class="seek_bar" id="seek_bar" type="range" value="0" />
         </div>
         <div class="music-controls">
             <a id="btn-prev">btn-prev</a>

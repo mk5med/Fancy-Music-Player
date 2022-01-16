@@ -132,12 +132,56 @@ body {
     position: absolute;
     width: 246px;
     height: 246px;
-    
+
     border-radius: 12px;
     background: #4F4F4F;
     background-size: cover;
     background-position: center;
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25), 0px -2px 14px rgba(0, 0, 0, 0.1);
+}
+
+/************************************************
+ * The seek bar
+ ************************************************/
+input[type="range"].seek_bar {
+    --thumbWidth: 15px;
+    --thumbHeight: 15px;
+    --thumbBackground: #fff;
+
+    display: block;
+    -webkit-appearance: none;
+    width: 80%;
+    height: 5px;
+    background: #222;
+    border-radius: 5px;
+    background-image: linear-gradient(#fff, #fff);
+    background-size: 0% 100%; /* The first percentage (width) is used to visualise the progression of the current track */
+    background-repeat: no-repeat;
+    /* transition: background 100ms; */
+}
+
+/* The rules below have been repeated and put on different lines as some browsers
+  reject an entire rule when an invalid selector is detected */
+input[type="range"].seek_bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: var(--thumbHeight);
+    width: var(--thumbWidth);
+    border-radius: 100%;
+    background: var(--thumbBackground);
+    cursor: grab;
+    box-shadow: 0 0 2px 0 #555;
+    transition: background .3s ease-in-out;
+}
+
+input[type="range"].seek_bar::-moz-range-thumb {
+    -webkit-appearance: none;
+    height: var(--thumbHeight);
+    width: var(--thumbWidth);
+    border-radius: 100%;
+    background: var(--thumbBackground);
+    cursor: grab;
+    box-shadow: 0 0 2px 0 #555;
+    transition: background .3s ease-in-out;
 }
 
 /************************************************
