@@ -10,7 +10,8 @@ export class AudioPlayer {
 
   private element_playBtn_img = this.element_playBtn.querySelector("img") as HTMLImageElement;
   private element_currentEntryDisplay: HTMLElement = $("#playing") as HTMLElement;
-  private element_thumbnail: HTMLImageElement = $("#thumbnail img") as HTMLImageElement
+  private element_currentAuthorDisplay: HTMLElement = $("#playingAuthor") as HTMLElement;
+  private element_thumbnail: HTMLImageElement = $("#thumbnail") as HTMLImageElement
 
   private _audioPlayer = new Audio();
   private playlistManager = new AudioPlayerPlaylist();
@@ -27,13 +28,12 @@ export class AudioPlayer {
 
   // Add tracks to the DOM playlist.
   addTrack(track: Track) {
-    // If this is the first item in the list, set it to be the selected track.
-    if (this.playlistManager.trackCount === 0) {
-      this.updateTrackTitle(track);
-    }
-
-    this.playlistManager.addTrack(track, (index, element) => {
+    this.playlistManager.addTrack(track, (index) => {
       this.changeTrackToIndex(index)
+      // If this is the first item in the list, set it to be the selected track.
+      if (this.playlistManager.trackCount === 0) {
+        this.updateTrackTitle(track);
+      }
     })
   }
 
@@ -52,8 +52,12 @@ export class AudioPlayer {
   // Change the current song header.
   updateTrackTitle(song: Track) {
     this.element_currentEntryDisplay.innerText = `${song.name}`;
-    this.playlistManager.getTrackImage(this.playlistManager.currentTrackIndex).then(images => {
-      this.element_thumbnail.src = `data:image/png;base64,` + images[0].data.toString("base64")
+    this.playlistManager.getTrackMetadata(this.playlistManager.currentTrackIndex).then(metadata => {
+      if (metadata.common.picture) {
+        this.element_thumbnail.style.backgroundImage = `url("data:image/png;base64,${metadata.common.picture[0].data.toString("base64")}")`
+      }
+      
+      this.element_currentAuthorDisplay.innerText = metadata.common.artist ?? "No author"
     })
   }
 
@@ -186,6 +190,7 @@ export class AudioPlayer {
   }
 }
 
+// AudioPlayer singleton for the app
 export var player_instance: AudioPlayer;
 
 export function setup_player() {

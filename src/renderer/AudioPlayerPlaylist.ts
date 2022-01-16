@@ -96,10 +96,11 @@ export class AudioPlayerPlaylist {
    * @param index Index of the track. If left empty it defaults to the current playlist index
    * @returns An array of picture metadata objects, otherwise undefined
    */
-  async getTrackImage(index: number) {
+  async getTrackMetadata(index: number) {
     index = this._wrapIndex(index);
     let metadata = await musicMetadata.parseBlob(this.track_playlist[index].file);
-    if(metadata.common.picture) return metadata.common.picture
+    if(metadata) return metadata
+    
     throw "No image found"
   }
 
