@@ -35,10 +35,14 @@ export class AudioPlayer {
     this.playlistManager.addTrack(track, (index) => {
       this.changeTrackToIndex(index)
       // If this is the first item in the list, set it to be the selected track.
-      if (this.playlistManager.trackCount === 0) {
+      if (this.playlistManager.currentTrackIndex === 0) {
         this.updateTrackTitle(track);
       }
     })
+
+    if (this.playlistManager.trackCount === 1) {
+      this.updateTrackTitle(track)
+    }
   }
 
   removeCurrentTrack() {
@@ -64,7 +68,7 @@ export class AudioPlayer {
       if (metadata.common.picture) {
         this.element_thumbnail.style.backgroundImage = `url("data:image/png;base64,${metadata.common.picture[0].data.toString("base64")}")`
       }
-      
+
       this.element_currentAuthorDisplay.innerText = metadata.common.artist ?? "No author"
     })
   }
@@ -130,7 +134,7 @@ export class AudioPlayer {
 
     if (this.isPlaying) {
       this._audioPlayer.pause();
-      if(this.seekbarInterval != -1) {
+      if (this.seekbarInterval != -1) {
         // When the playback is paused, remove the timed interval
         clearInterval(this.seekbarInterval);
       }
@@ -141,7 +145,7 @@ export class AudioPlayer {
       this.seekbarInterval = setInterval(() => {
         this.element_playbackTrack.max = this._audioPlayer.duration + ""
         this.element_playbackTrack.value = this._audioPlayer.currentTime + ""
-        this.element_playbackTrack.style.backgroundSize = `${this._audioPlayer.currentTime/this._audioPlayer.duration * 100}% 100%`
+        this.element_playbackTrack.style.backgroundSize = `${this._audioPlayer.currentTime / this._audioPlayer.duration * 100}% 100%`
       }, 10) as unknown as number
     }
   }
@@ -149,6 +153,7 @@ export class AudioPlayer {
   // Starts playing the current track.
   playCurrentTrack() {
     let track = this.playlistManager.currentTrack;
+
     // Don't re-add the same source URL. Even if the source is identical. When the source changes the track commences at the begining.
     if (this._audioPlayer.src != track.url) this._audioPlayer.src = track.url;
     this._audioPlayer.play();
