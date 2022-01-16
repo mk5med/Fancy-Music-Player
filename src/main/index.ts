@@ -1,14 +1,14 @@
 'use strict'
-import { app, BrowserWindow } from "electron";
-import {format as formatUrl} from "url";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { format as formatUrl } from "url";
 import * as path from "path";
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-var mainWindow:BrowserWindow | null;
+var mainWindow: BrowserWindow | null;
 function createWindow() {
 
-    let window:BrowserWindow | null = new BrowserWindow({
+    let window: BrowserWindow | null = new BrowserWindow({
         width: 1168,
         height: 526,
         minWidth: 1168,
@@ -40,8 +40,8 @@ function createWindow() {
 
 app.on("ready", () => {
     mainWindow = createWindow();
-    {mainWindow};
-    
+    { mainWindow };
+
     console.log("Ready")
 });
 
@@ -49,8 +49,9 @@ app.on("window-all-closed", () => {
     app.quit();
 });
 
-
-// let playlist = document.getElementById("playlist") as HTMLElement
-
-// playlist.ondrop = dropHandler
-// playlist.ondragover = dragover_handler
+ipcMain.handle('app:on-fs-dialog-open', (event) => {
+    const files = dialog.showOpenDialogSync({
+        properties: ['openFile', 'openDirectory', 'multiSelections'],
+    });
+    return files;
+});

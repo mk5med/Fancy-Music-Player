@@ -1,6 +1,7 @@
-// import { dialog } from "electron";
+import { ipcRenderer } from "electron";
 import { player_instance } from "./AudioPlayer";
-
+import fs from 'fs';
+import { Track } from "./AudioPlayerPlaylist";
 export interface DirectoryReader {
   readEntries: (a: (e: any[]) => void) => void
 }
@@ -14,10 +15,24 @@ export interface FileOrDirectoryEntry {
 
 export async function openOSFileImportPrompt() {
   // The dialog import only exists in the main process
-  // dialog.showOpenDialog({
-  //   title: "Test 123",
-  //   properties: ['openFile', 'openDirectory', 'multiSelections']
-  // })
+  ipcRenderer.invoke('app:on-fs-dialog-open').then(async (files: string[] | undefined) => {
+    if (!files) return;
+    for (let i = 0; i < files.length; i++) {
+      let path = files[i];
+      let stats = await fs.promises.lstat(path);
+      stats.ctime
+      if (stats.isDirectory()) {
+        // TODO: Implement
+      } else {
+        const file = new File([await fs.promises.readFile(path)], path.replace(/^.*[\\\/]/, ''))
+        player_instance.addTrack({
+          url: URL.createObjectURL(file),
+          name: file.name,
+          file: file
+        })
+      }
+    }
+  })
 }
 
 /**
@@ -27,14 +42,14 @@ export async function openOSFileImportPrompt() {
  * @param item File to scan
  * @returns A promise to complete the file or directory scan
  */
- export async function scanFileEntry(item: FileOrDirectoryEntry): Promise<any> {
+export async function scanFileEntry(item: FileOrDirectoryEntry): Promise<any> {
   // If it is a directory, wait to scan all files within it
   if (item.isDirectory) {
     let files = await dirReader(item);
     return Promise.all(files.map(file => scanFileEntry(file)))
   }
 
-  return fileReader(item).then((file) => {
+  return fileReader(item).then((file: File) => {
     player_instance.addTrack({
       name: file.name,
       url: URL.createObjectURL(file),
