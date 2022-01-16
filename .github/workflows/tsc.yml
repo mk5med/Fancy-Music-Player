@@ -1,0 +1,21 @@
+name: TSC Compilation Check
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+jobs:
+  compileProject:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    # - name: Cache node_modules
+    #   uses: actions/cache@v2
+    #   with:
+    #       path: '**/node_modules'
+    #       key: node-modules-${{ hashFiles('**/yarn.lock') }}
+    - name: Install node_modules
+      run: yarn --frozen-lockfile
+      
+    - name: Compile Typescript
+      run: tsc --noEmit
