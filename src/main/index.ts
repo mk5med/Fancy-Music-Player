@@ -49,9 +49,17 @@ app.on("window-all-closed", () => {
     app.quit();
 });
 
-ipcMain.handle('app:on-fs-dialog-open', (event) => {
-    const files = dialog.showOpenDialogSync({
+ipcMain.handle('app:on-fs-dialog-open', async (event) => {
+    const files = await dialog.showOpenDialog({
         properties: ['openFile', 'openDirectory', 'multiSelections'],
     });
     return files;
+});
+
+ipcMain.handle('app:on-fs-dialog-save', async (event) => {
+    const saveFile = await dialog.showSaveDialog({
+        properties: ['createDirectory', 'showHiddenFiles', 'showOverwriteConfirmation'],
+    });
+    
+    return saveFile;
 });

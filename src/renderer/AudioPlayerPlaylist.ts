@@ -1,10 +1,13 @@
 import { $ } from './Helper'
 import { openOSFileImportPrompt } from './PlaylistFileHelper';
 import * as musicMetadata from 'music-metadata-browser';
+import fs from 'fs'
+import { ipcRenderer } from 'electron';
 export interface Track {
   name: string,
   url: string
-  file: File
+  file: File,
+  path: string
 }
 
 export class AudioPlayerPlaylist {
@@ -14,12 +17,12 @@ export class AudioPlayerPlaylist {
   private track_playlist: Track[] = []
   private elements_playlistEntries: HTMLElement[] = [];
   private playlistIndex: number = 0;
-  
+
   constructor() {
-    this.element_addTrackBtn.addEventListener('click', () => openOSFileImportPrompt());
-    this.element_savePlaylistBtn.addEventListener('click', () => 0);
+    this.element_addTrackBtn.addEventListener('click', async () => await this.openFileOrPlaylist());
+    this.element_savePlaylistBtn.addEventListener('click', async () => await this.savePlaylist());
   }
-  
+
   /**
    * Wrap an index around the playlist index space.
    * Negative numbers reference the end of the playlist.
@@ -82,9 +85,9 @@ export class AudioPlayerPlaylist {
       // The current item is de-selected
       selectedElement.classList.remove("selected");
     }
-    
+
     index = this._wrapIndex(index)
-    
+
     this.playlistIndex = index
     this.element_playlistContainer.children[index].classList.add("selected");
 
@@ -99,8 +102,8 @@ export class AudioPlayerPlaylist {
   async getTrackMetadata(index: number) {
     index = this._wrapIndex(index);
     let metadata = await musicMetadata.parseBlob(this.track_playlist[index].file);
-    if(metadata) return metadata
-    
+    if (metadata) return metadata
+
     throw "No image found"
   }
 
@@ -120,6 +123,25 @@ export class AudioPlayerPlaylist {
     this.elements_playlistEntries[index].remove();
     this.elements_playlistEntries.splice(index, 1);
     this.track_playlist.splice(index, 1);
+  }
+
+  /**
+   * Opens a dialog to save the current playlist.
+   * The playlist is stored as a stringified array of the media paths.
+   */
+  async savePlaylist() {
+    let playlist = this.track_playlist.map(track => track.path);
+    let file: Electron.SaveDialogReturnValue = await ipcRenderer.invoke("app:on-fs-dialog-save")
+
+    if (file.filePath == undefined) return; // No path specified
+    await fs.promises.writeFile(file.filePath, JSON.stringify(playlist), { encoding: 'ascii' })
+  }
+
+  /**
+   * Opens a dialog to open a media file, directory, or playlist file.
+   */
+  async openFileOrPlaylist() {
+    await openOSFileImportPrompt()
   }
 
   /**

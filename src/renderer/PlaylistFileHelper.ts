@@ -1,7 +1,7 @@
 import { ipcRenderer } from "electron";
 import { player_instance } from "./AudioPlayer";
 import fs from 'fs';
-import { Track } from "./AudioPlayerPlaylist";
+import path from 'path'
 export interface DirectoryReader {
   readEntries: (a: (e: any[]) => void) => void
 }
@@ -15,21 +15,32 @@ export interface FileOrDirectoryEntry {
 
 export async function openOSFileImportPrompt() {
   // The dialog import only exists in the main process
-  ipcRenderer.invoke('app:on-fs-dialog-open').then(async (files: string[] | undefined) => {
-    if (!files) return;
-    for (let i = 0; i < files.length; i++) {
-      let path = files[i];
-      let stats = await fs.promises.lstat(path);
-      stats.ctime
+  ipcRenderer.invoke('app:on-fs-dialog-open').then(async ({ filePaths: file_paths }: Electron.OpenDialogReturnValue) => {
+    if (!file_paths) {
+      return;
+    }
+
+    for (let i = 0; i < file_paths.length; i++) {
+      let file_path = file_paths[i];
+      let stats = await fs.promises.lstat(file_path);
+
       if (stats.isDirectory()) {
-        // TODO: Implement
+        let paths = await fs.promises.readdir(file_path) // `readdir` returns file names without the current path
+        paths = paths.map(fileName => path.join(file_path, fileName)) // For each element, add the full path
+        arrPushUnique(file_paths, paths); // Only append new paths that do not exist into the files buffer
       } else {
-        const file = new File([await fs.promises.readFile(path)], path.replace(/^.*[\\\/]/, ''))
-        player_instance.addTrack({
-          url: URL.createObjectURL(file),
-          name: file.name,
-          file: file
-        })
+        try {
+          // Try parsing the file as a playlist file
+          let paths: string[] = JSON.parse(await fs.promises.readFile(file_path, 'ascii'))
+          arrPushUnique(file_paths, paths) // Only append new paths that do not exist into the files buffer
+
+        } catch {
+          // The parsing failed, try parsing the file as a media file
+          const file = new File([await fs.promises.readFile(file_path)], file_path.replace(/^.*[\\\/]/, ''))
+
+          // The file path is empty as it is generated from a Buffer. We need to explicitly state the current buffer
+          addTrackToPlaylist(file, file_path);
+        }
       }
     }
   })
@@ -50,11 +61,7 @@ export async function scanFileEntry(item: FileOrDirectoryEntry): Promise<any> {
   }
 
   return fileReader(item).then((file: File) => {
-    player_instance.addTrack({
-      name: file.name,
-      url: URL.createObjectURL(file),
-      file: file
-    });
+    addTrackToPlaylist(file)
   });
 }
 
@@ -84,4 +91,29 @@ function fileReader(file: FileOrDirectoryEntry): Promise<File> {
   return new Promise((res) => {
     file.file((_file: File) => res(_file));
   });
+}
+
+/**
+ * Converts a media file into a track object and adds it to
+ * the current audioplayer playlist.
+ * The path value is optional as importing a file from
+ * the open-file dialog sets an empty path value on the `File` instance.
+ * @param file A media file
+ */
+function addTrackToPlaylist(file: File, path: string = file.path) {
+  player_instance.addTrack({
+    url: URL.createObjectURL(file),
+    name: file.name,
+    file: file,
+    path
+  });
+}
+
+/**
+ * Provides a wrapper to only push unique strings into the `parent` array.
+ * @param parent The array to mutate
+ * @param incoming The array with new data
+ */
+function arrPushUnique(parent: string[], incoming: string[]) {
+  parent.push(...incoming.filter(newPath => !parent.includes(newPath)));
 }
