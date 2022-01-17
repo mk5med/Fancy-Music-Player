@@ -1,6 +1,5 @@
 #  <img src="./build/icon.png" alt="drawing" width="70"/> Fancy Music Player (Fmp)
-A new version of the app is being developed including an updated UI, more options for playlist management, and a functional display for images stored in the audio metadata. You can follow the progress on the [change/update-design](https://github.com/viktorKorolyuk/Fancy-Music-Player/tree/change/update-design) branch.
-
+![TSC Compilation Check](https://github.com/viktorKorolyuk/Fancy-Music-Player/actions/workflows/tsc.yml/badge.svg)
 
 ![UI Sample](./assets/images/sample.png)
 
